@@ -1,0 +1,61 @@
+SRCDIR = .
+DSTDIR = .
+
+FRAMEWORKDIR = $(SRCDIR)/framework
+
+EXEC=main
+FILES= $(wildcard $(FRAMEWORKDIR)/*.cpp)
+OBJS = $(subst .cpp,.o,$(FILES))
+
+CXXFLAGS = -O3 -o prog -D_GNU_SOURCE -L/Users/benmalartre/Documents/RnD/mFramework/libs
+LIBS = -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo -lglfw3
+
+TEST=
+
+#FILES = $(wildcard $(DIR)/*.c)
+#OBJS = $(subst .c,.o,$(FILES))
+
+#final-target: $(OBJS)
+#    $(LD) -o $@ $+  # or similar
+
+all: $(OBJS)
+	@echo "#--------------------------------"
+	@echo "# make target: all"
+	@echo "#--------------------------------"
+	g++ -o $@ $^ $(CFLAGS) $(CXXFLAGS) $(LIBS)
+	
+	
+%.o : %.cpp
+	@echo "# make object: $@"
+	g++ -c $(CFLAGS) $(CXXFLAGS) $< -o $@
+		
+	
+#all: $(EXEC)
+#ifeq ($(DEBUG),yes)
+#	@echo "Compilation >>>  DEBUG MODE"
+#else
+#	@echo "Compilation >> RELEASE MODE"
+#endif
+
+#hello: $(OBJ)
+#	@echo "HELLO"
+#	@$(CC) -o $@ $^ $(LDFLAGS)
+
+#main.o: main.cpp
+
+#%.o: %.cpp
+#	@echo "BUILD OBJECT %"
+#	@$(CXX) $(LIBS) -o $@ -c $< $(CFLAGS)
+
+#.PHONY: clean mrproper
+
+#clean:
+#	@rm -rf *.o
+
+#mrproper: clean
+#	@rm -rf $(EXEC)
+	
+#$(CXX) $(CXXFILES) $(LIBS) $(CXXFLAGS)
+
+#$(mPLUGIN):  LFLAGS   := $(LFLAGS) -Llibs
+#$(mPLUGIN):  LIBS     := $(LIBS) -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo -lglfw3
