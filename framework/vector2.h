@@ -33,7 +33,7 @@ public:
     };
     
     // destructor
-    ~Vector3(){};
+    ~Vector2(){};
     
     // access element
     float& operator [](long z)
@@ -104,6 +104,18 @@ public:
         return(x*x + y*y);
     };
     
+    // equality op
+    bool operator ==(const Vector2& v) const
+    {
+        return (x == v.x && y == v.y);
+    }
+    
+    // not op
+    bool operator !=(const Vector2& v) const
+    {
+        return (x != v.x || y != v.y);
+    }
+    
     // negate op
     Vector2 operator -(void) const
     {
@@ -135,20 +147,22 @@ public:
         return Vector2(x*invf, y*invf);
     };
     
-    // dot product op
-    float operator *(const Vector2& v) const
+    // product op
+    Vector2 operator *(const Vector2& v) const
     {
-        return (x*v.x + y*v.y);
+        return Vector2(x*v.x , y*v.y);
     };
+    
+    // dot product op
     float dot(const Vector2& v) const
     {
-        return (*this*v);
+        return float(x*v.x + y*v.y);
     };
     
     // cross product op
     Vector2 operator ^(const Vector2& v) const
     {
-        return Vector2(x * v.y - y * v.x);
+        return Vector2(v.y, -v.x);
     }
     Vector2 cross(const Vector2& v) const
     {

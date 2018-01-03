@@ -4,7 +4,7 @@
 #include "vertex.h"
 
 namespace BOB{
-    /*
+/*
 void Vertex::projectOnPlane(Vector3& point, Vector3& orig, Vector3& normal, Vector3& projected)
 {
 	Vector3 delta = point-orig;

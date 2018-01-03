@@ -45,6 +45,21 @@ public:
         return ((&x)[z]);
     }
     
+    // set
+    Vector3& set(float X, float Y, float Z)
+    {
+        x=X;
+        y=Y;
+        z=Z;
+        return *this;
+    }
+    
+    // equality op
+    bool operator ==(const Vector3& v) const
+    {
+        return (x==v.x && y==v.y && z==v.z);
+    }
+    
     // equal op
     Vector3& operator =(const Vector3& v)
     {
@@ -112,13 +127,13 @@ public:
     }
     
     // length
-    float length()
+    float length() const
     {
         return(sqrt(x*x + y*y + z*z));
     };
     
     // length squared
-    float lengthSquared()
+    float lengthSquared() const
     {
         return(x*x + y*y + z*z);
     };
@@ -179,14 +194,16 @@ public:
         return Vector3(x*invf, y*invf, z*invf);
     };
     
-    // dot product op
-    float operator *(const Vector3& v) const
+    // product op
+    Vector3 operator *(const Vector3& v) const
     {
-        return (x*v.x + y*v.y + z*v.z);
+        return Vector3(x*v.x , y*v.y , z*v.z);
     };
+    
+    // dot product op
     float dot(const Vector3& v) const
     {
-        return (*this*v);
+        return (x*v.x + y*v.y + z*v.z);
     };
     
     // cross product op
@@ -204,7 +221,26 @@ public:
     {
         return (Vector3(*this) /= (float)sqrt(x*x + y*y + z*z));
     }
-
+    
+    // transform
+    Vector3 transform(const Matrix4& m)
+    {
+        float X = x*m[0] + y*m[4] + z*m[8] + m[12];
+        float Y = x*m[1] + y*m[5] + z*m[9] + m[13];
+        float Z = x*m[2] + y*m[6] + z*m[10] + m[14];
+        float W = x*m[3] + y*m[7] + z*m[11] + m[15];
+        
+        float inv = (W != 0.0f) ? 1.0f/W : 1.0f;
+        return Vector3(inv * X, inv * Y, inv * Z);
+    }
+    
+    // transform dir
+    Vector3 transformDir(const Matrix4& m)
+    {
+        return Vector3(x * m[0] + y * m[4] + z * m[8],
+                       x * m[1] + y * m[5] + z * m[9],
+                       x * m[2] + y * m[6] + z * m[10]);
+    }
 };
 } // end namespace BOB
 #endif /* _VECTOR3_H_ */

@@ -138,12 +138,12 @@ class Quaternion{
     
         blend *= 0.5;
     
-        theta = acos(dp);
+        theta = acosf(dp);
         if(theta<0)theta *= -1;
     
-        st = sin(theta);
-        sut = sin(blend*theta);
-        sout = sin((1-blend)*theta);
+        st = sinf(theta);
+        sut = sinf(blend*theta);
+        sout = sinf((1-blend)*theta);
         coeff1 = sout/st;
         coeff2 = sut/st;
     
@@ -166,7 +166,7 @@ class Quaternion{
     Quaternion& setFromAxisAngle(float in_x, float in_y, float in_z, float angle)
     {
         // normalize axis
-        float l = sqrt(in_x*in_x + in_y*in_y + in_z*in_z);
+        float l = sqrtf(in_x*in_x + in_y*in_y + in_z*in_z);
         float invl=1.0f/l;
         float ax = in_x*invl;
         float ay = in_x*invl;
@@ -174,11 +174,11 @@ class Quaternion{
         
         float halfAngle, sinAngle;
         halfAngle = angle*0.5;
-        sinAngle = sin(halfAngle);
+        sinAngle = sinf(halfAngle);
         x = ax * sinAngle;
         y = ay * sinAngle;
         z = az * sinAngle;
-        w = cos(halfAngle);
+        w = cosf(halfAngle);
         return *this;
     }
     
@@ -194,7 +194,7 @@ class Quaternion{
         
     	if(fabs(mag2 - 1.0)>0.0001)
         {
-            float mag = sqrt(mag2);
+            float mag = sqrtf(mag2);
     
             x /= mag;
             y /= mag;
@@ -212,7 +212,7 @@ class Quaternion{
         
         if(fabs(mag2 - 1.0)>0.0001)
         {
-            float mag = sqrt(mag2);
+            float mag = sqrtf(mag2);
             
             q.x = x/mag;
             q.y = y/mag;
@@ -230,12 +230,12 @@ class Quaternion{
         r = roll * DEGREE_TO_RADIAN * 0.5;
     
         float sinp,siny,sinr,cosp,cosy,cosr;
-        sinp = sin(p);
-        siny = sin(y);
-        sinr = sin(r);
-        cosp = cos(p);
-        cosy = cos(y);
-        cosr = cos(r);
+        sinp = sinf(p);
+        siny = sinf(y);
+        sinr = sinf(r);
+        cosp = cosf(p);
+        cosy = cosf(y);
+        cosr = cosf(r);
     
         x = sinr * cosp * cosy - cosr * sinp * siny;
         y = cosr * sinp * cosy + sinr * cosp * siny;

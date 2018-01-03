@@ -226,7 +226,7 @@ public:
         
         if(tr>0.0f)
         {
-            S = sqrt(tr+1.0f)*2.0f;
+            S = sqrtf(tr+1.0f)*2.0f;
             Q.w = 0.25f * S;
             Q.x = (v[9] - v[6]) / S;
             Q.y = (v[2] - v[8]) / S;
@@ -234,7 +234,7 @@ public:
         }
         else if(v[0] > v[5] && v[0] > v[10])
         {
-            S = sqrt(1.0f + v[0] - v[5] - v[10]) * 2.0f;
+            S = sqrtf(1.0f + v[0] - v[5] - v[10]) * 2.0f;
             Q.w = (v[9] - v[6]) / S;
             Q.x = 0.25f * S;
             Q.y = (v[1] + v[4]) / S;
@@ -242,7 +242,7 @@ public:
         }
         else if(v[5] > v[10])
         {
-            S = sqrt(1.0f + v[5] - v[0] - v[10]) * 2.0f;
+            S = sqrtf(1.0f + v[5] - v[0] - v[10]) * 2.0f;
             Q.w = (v[2] - v[8]) / S;
             Q.x = (v[1] + v[4]) / S;
             Q.y = 0.25f * S;
@@ -250,7 +250,7 @@ public:
         }
         else
         {
-            S = sqrt(1.0f + v[10] - v[0] - v[5]) * 2.0f;
+            S = sqrtf(1.0f + v[10] - v[0] - v[5]) * 2.0f;
             Q.w = (v[4] - v[1]) / S;
             Q.x = (v[2] + v[8]) / S;
             Q.y = (v[6] + v[9]) / S;

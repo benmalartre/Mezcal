@@ -167,4 +167,10 @@ namespace BOB{
         m.setFromTwoVectors(dir, up);
         return m.getQuaternion(transpose);
     }
+    
+    inline Vector3 euclideanProjection(const Vector4& homogenous)
+    {
+        float inv = (homogenous[3] != 0.0f) ? 1.0f/homogenous[3] : 1.0f;
+        return Vector3(inv * homogenous[0], inv * homogenous[1], inv * homogenous[2]);
+    }
 }

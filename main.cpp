@@ -80,8 +80,7 @@ Mesh* createSquare()
 
 void openGLInfos()
 {
-    printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION),
-    glGetString(GL_SHADING_LANGUAGE_VERSION));
+    printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -120,8 +119,9 @@ static void refresh_callback(GLFWwindow *window)
 
 static void resize_callback(GLFWwindow *window, int width, int height)
 {
-    width = MINIMUM(width, 1);
-    height = MINIMUM(height, 1);
+    width = MAXIMUM(width, 1);
+    height = MAXIMUM(height, 1);
+    std::cout << "WIDTH : "<<width<<", HEIGHT : "<< height<<std::endl;
     glViewport(0, 0, width, height);
     glClearDepth(1.0);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -150,38 +150,6 @@ void createDynamicWorld()
 
 }
 
-void GLCheckError(std::string msg)
-{
-    unsigned err = glGetError();
-    if(err)
-    {
-        switch(err)
-        {
-            case GL_INVALID_ENUM:
-                std::cout << "[OpenGL Error] INVALID ENUM :" << msg << std::endl;
-                break;
-            case GL_INVALID_VALUE:
-                std::cout << "[OpenGL Error] INVALID VALUE :" << msg << std::endl;
-                break;
-            case GL_INVALID_OPERATION:
-                std::cout << "[OpenGL Error] INVALID OPERATION :" << msg << std::endl;
-                break;
-            case GL_OUT_OF_MEMORY:
-                std::cout << "[OpenGL Error] OUT OF MEMORY :" << msg << std::endl;
-                break;
-            case GL_STACK_UNDERFLOW:
-                std::cout << "[OpenGL Error] STACK UNDERFLOW :" << msg << std::endl;
-                break;
-            case GL_STACK_OVERFLOW:
-                std::cout << "[OpenGL Error] STACK OVERFLOW :" << msg << std::endl;
-                break;
-            default:
-                std::cout << "[OpenGL Error] UNKNOWN ERROR :" << msg << std::endl;
-                break;
-        }
-    }
-}
-
 static int thread_test_args (void * aArg)
 {
     return *(int*)aArg;
@@ -207,7 +175,7 @@ static void test_thread_arg_and_retval(void)
         std::cout << "Thread " << i << " ---> ID : " << (retval == ids[i])<<std::endl;
     }
     
-    std::cout << "Threads Finshed!!!" << std::endl;
+    std::cout << "Threads Finished!!!" << std::endl;
 }
 
 void buildGLData(Mesh* mesh)
@@ -334,9 +302,6 @@ int main(void)
     
     Matrix4 identity;
     identity.identity();
-    //glUseProgram(0);
-    //GLuint vbo;
-    
     
     createDynamicWorld();
     
@@ -347,17 +312,16 @@ int main(void)
     /* Create a windowed mode window and its OpenGL context */
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    window = glfwCreateWindow(640, 480, "QA", NULL, NULL);
+    window = glfwCreateWindow(640, 480, "MEZCAL 3D FRAMEWORK", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
         return -1;
     }
-    
-    glfwMakeContextCurrent(window);
+
     
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
@@ -365,16 +329,19 @@ int main(void)
     // attach callbacks
     glfwSetKeyCallback(window, key_callback);
     glfwSetFramebufferSizeCallback(window, resize_callback);
-    glfwSetWindowRefreshCallback(window, refresh_callback);
+    //glfwSetWindowRefreshCallback(window, refresh_callback);
     
     if (gl3wInit()) {
         fprintf(stderr, "failed to initialize OpenGL\n");
         return -1;
     }
-    if (!gl3wIsSupported(3, 2)) {
-        fprintf(stderr, "OpenGL 3.2 not supported\n");
+    if (!gl3wIsSupported(3, 3)) {
+        fprintf(stderr, "OpenGL 3.3 not supported\n");
         return -1;
     }
+    
+    // openGL infos
+    openGLInfos();
     
     // create shader
     GLSLProgram pgm("simple");
@@ -390,16 +357,44 @@ int main(void)
     GLuint vbo;
     glGenBuffers(1,&vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    size_t s = 1024;
+    
+    size_t s = mesh->nbTriangles*9*sizeof(float);
     glBufferData(GL_ARRAY_BUFFER,s,NULL,GL_STATIC_DRAW);
     
+    std::cout << "Mesh GL Datas Size : " << s << std::endl;
     
+    float datas[mesh->nbTriangles*9];
+    unsigned index=0;
+    for(unsigned i=0;i<mesh->nbTriangles*3;i++)
+    {
+        datas[i*3] = mesh->positions[mesh->triangles[i]].x;
+        datas[i*3+1] = mesh->positions[mesh->triangles[i]].y;
+        datas[i*3+2] = mesh->positions[mesh->triangles[i]].z;
+    }
+    glBufferSubData(GL_ARRAY_BUFFER,0,s,&datas[0]);
+    GLCheckError("Push Mesh Datas to GPU");
     
+    // Attibute Position 0
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,0);
+    
+    GLuint u_view = glGetUniformLocation(pgm.get(), "view");
+    GLCheckError("Get View Uniform");
+    GLuint u_model = glGetUniformLocation(pgm.get(), "model");
+    GLCheckError("Get Model Uniform");
+    GLuint u_proj = glGetUniformLocation(pgm.get(), "projection");
+    GLCheckError("Get Projection Uniform");
+    GLuint u_color = glGetUniformLocation(pgm.get(), "color");
+    GLCheckError("Get Color Uniform");
+    
+    Matrix4 viewM;
+    Matrix4 projM;
+    Matrix4 modelM;
+    modelM.identity();
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        
         /* randomize color */
         float r = (float) (rand()) / (float) (RAND_MAX);
         float g = (float) (rand()) / (float) (RAND_MAX);
@@ -422,28 +417,18 @@ int main(void)
         glClearColor(r,g,b,0.0f);
         
         /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
-        /*
-        glMatrixMode(GL_PROJECTION);
-        Matrix4 tp = camera.projectionMatrix();
-        glLoadMatrixf(&tp.v[0]);
-    	
-        glMatrixMode(GL_MODELVIEW);
-        Matrix4 tv = camera.viewMatrix();
-        glLoadMatrixf(&tv.v[0]);
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         
-        // Draw a triangle:
-        glBegin(GL_TRIANGLES);
+        viewM = camera.viewMatrix();
+        projM = camera.projectionMatrix();
+        glUniformMatrix4fv(u_view, 1, GL_FALSE, &viewM.v[0]);
+        glUniformMatrix4fv(u_proj, 1, GL_FALSE, &projM.v[0]);
+        glUniformMatrix4fv(u_model, 1, GL_FALSE, &modelM.v[0]);
         
-        // draw square
-        for(unsigned i=0; i<mesh->nbTriangles*3; i++)
-        {
-            glVertex3f(mesh->positions[mesh->triangles[i]].x,
-                       mesh->positions[mesh->triangles[i]].y,
-                       mesh->positions[mesh->triangles[i]].z);
-        }
-        glEnd();
-         */
+        glUniform3f(u_color, random_0_1(), random_0_1(), random_0_1());
+        GLCheckError("Set Color Uniform");
+        glDrawArrays(GL_TRIANGLES,0, mesh->nbTriangles*3);
+        
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
         

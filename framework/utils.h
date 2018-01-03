@@ -5,6 +5,7 @@
 #define _UTILS_H_
 
 #include "vector3.h"
+#include "vector4.h"
 #include "quaternion.h"
 #include "matrix3.h"
 #include "matrix4.h"
@@ -65,6 +66,8 @@ T HERMITE_INTERPOLATE(T y0,T y1,T y2,T y3,T mu,T tension,T bias)
 
     void rotateVector(Vector3& v, const Quaternion& q);
     Vector3 rotateVector(Vector3& v, Quaternion& q);
+    
+    inline Vector3 euclideanProjection(const Vector4& homogenous);
 
     // Execute a system command
     //int executeCommand(const char* cmd);

@@ -117,5 +117,12 @@ namespace BOB{
         }
         
     }
+    
+    void Mesh::set(unsigned num_points, const float* in_positions)
+    {
+        
+    }
+    
+    
 
 }//end namespace BOB

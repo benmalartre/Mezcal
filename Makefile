@@ -6,10 +6,10 @@ CXXFLAGS = 	-Wall\
 		-mmacosx-version-min=10.9\
 		-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk \
 		-I$(RND)/bullet3-2.83.7/src \
-		-I$(RND)/mFramework/gl3w \
+		-I$(RND)/Mezcal/gl3w \
 		-o prog \
 		-D_GNU_SOURCE \
-		-L$(RND)/mFramework/libs
+		-L$(RND)/Mezcal/libs
 
 LIBS =	-std=c++11 \
 	-framework Cocoa \

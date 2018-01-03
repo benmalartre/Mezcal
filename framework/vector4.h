@@ -32,6 +32,14 @@ class Vector4{
         w=1.0f;
     };
     
+    Vector4(const Vector3& other, float W)
+    {
+        x=other.x;
+        y=other.y;
+        z=other.z;
+        w=W;
+    }
+    
     Vector4(const Vector4& other)
     {
         x=other.x;

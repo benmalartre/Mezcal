@@ -29,6 +29,12 @@ namespace BOB{
                     case GL_OUT_OF_MEMORY:
                         std::cout << "[OpenGL Error] " << message << " OUT_OF_MEMORY" << std::endl;
                         break;
+                    case GL_STACK_UNDERFLOW:
+                        std::cout << "[OpenGL Error] " << message << "STACK_UNDERFLOW" <<std::endl;
+                        break;
+                    case GL_STACK_OVERFLOW:
+                        std::cout << "[OpenGL Error] " << message << "STACK_OVERFLOW" << std::endl;
+                        break;
                     default:
                         std::cout << "[OpenGL Error] " << message << " UNKNOWN_ERROR" << std::endl;
                         break;
@@ -40,4 +46,5 @@ namespace BOB{
         return false;
     }
 }
+
 #endif /* _GL_UTILS_H_ */

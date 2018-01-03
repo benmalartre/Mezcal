@@ -18,7 +18,8 @@ public:
     ~Mesh();
     
     void set(unsigned num_points, const float * positions, const float* normals, Matrix4& M);
-
+    void set(unsigned num_points, const float* positions);
+    
 	unsigned nbVertices;
 	unsigned nbFaces;
 	unsigned nbTriangles;
