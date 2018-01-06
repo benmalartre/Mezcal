@@ -55,11 +55,11 @@ void Triangle::closestPoint( const float* positions, const Vector3 &point , Vect
     v0.y = positions[vertices[0]*3+1] - point.y;
     v0.z = positions[vertices[0]*3+2] - point.z;
     
-    float a = edge0 * edge0;
-    float b = edge0 * edge1;
-    float c = edge1 * edge1;
-    float d = edge0 * v0;
-    float e = edge1 * v0;
+    float a = edge0.dot(edge0);
+    float b = edge0.dot(edge1);
+    float c = edge1.dot(edge1);
+    float d = edge0.dot(v0);
+    float e = edge1.dot(v0);
     
     float det = a*c - b*b;
     float s = b*e - c*d;
@@ -184,8 +184,8 @@ bool Triangle::planeBoxTest(const Vector3& normal, const Vector3& vert, const Ve
         
     }
     
-    if((normal*vmin)>0.0f) return false;
-    if((normal*vmax)>=0.0f) return true;
+    if((normal.dot(vmin))>0.0f) return false;
+    if((normal.dot(vmax))>=0.0f) return true;
     
     return false;
 }

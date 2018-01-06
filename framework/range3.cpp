@@ -56,7 +56,7 @@ Range3 Range3::getOctant(size_t i) const
     }
 
     Vector3 a = getCorner(i);
-    Vector3 b = .5 * (_min + _max);
+    Vector3 b = (_min + _max) * 0.5f;
 
     return Range3(
         Vector3(MINIMUM(a[0], b[0]), MINIMUM(a[1], b[1]), MINIMUM(a[2], b[2])),

@@ -156,6 +156,12 @@ public:
         return Vector3(x-v.x, y-v.y, z-v.z);
     };
     
+    // subtract op
+    Vector3 operator -(const float& f) const
+    {
+        return Vector3(x-f, y-f, z-f);
+    };
+    
     // scale op
     Vector3 operator *(float f) const
     {
@@ -223,7 +229,7 @@ public:
     }
     
     // transform
-    Vector3 transform(const Matrix4& m)
+    Vector3 transform(const Matrix4& m) const
     {
         float X = x*m[0] + y*m[4] + z*m[8] + m[12];
         float Y = x*m[1] + y*m[5] + z*m[9] + m[13];
@@ -235,7 +241,7 @@ public:
     }
     
     // transform dir
-    Vector3 transformDir(const Matrix4& m)
+    Vector3 transformDir(const Matrix4& m) const
     {
         return Vector3(x * m[0] + y * m[4] + z * m[8],
                        x * m[1] + y * m[5] + z * m[9],

@@ -84,7 +84,7 @@ class Plane
     /// positive if the point is on the side of the plane containing the
     /// normal.
     float getDistance(const Vector3 &p) const {
-        return p * _normal - _distance;
+        return p.dot(_normal)	 - _distance;
     }
 
     /// Return the projection of \p p onto the plane.

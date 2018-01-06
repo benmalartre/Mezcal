@@ -15,13 +15,14 @@ class AABB;
 class Triangle;
 
 class Ray{
-    public:
-    Vector3 pos;
-    Vector3 dir;
+    
 
     Ray();
     Ray(float px, float py, float pz, float dx, float dy, float dz);
     Ray(const Vector3& p, const Vector3& d);
+    
+    const Vector3& getOrigin() const {return pos;};
+    const Vector3& getDirection() const {return dir;};
     
     Ray& transform(const Matrix4& matrix);
     
@@ -64,6 +65,10 @@ class Ray{
     //float intersectBox(const Matrix4 & tx, const Vector3 & br );
     //bool intersectBox(AABB* box);
     ~Ray();
+    
+private:
+    Vector3 pos;
+    Vector3 dir;
 };
 }// end namespace BOB
 #endif /* _RAY_H_ */

@@ -43,11 +43,11 @@ Range2 Range2::getQuadrant(size_t i) const
     }
 
     Vector2 a = getCorner(i);
-    Vector2 b = .5 * (_min + _max);
+    Vector2 b = (_min + _max) * 0.5f;
 
     return Range2(
         Vector2(MINIMUM(a[0], b[0]), MINIMUM(a[1], b[1])),
-        GfVec2f(MAXIMUM(a[0], b[0]), MAXIMUM(a[1], b[1])));
+        Vector2(MAXIMUM(a[0], b[0]), MAXIMUM(a[1], b[1])));
 }
 
 const Range2 Range2::unitSquare(Vector2(0,0), Vector2(1,1));

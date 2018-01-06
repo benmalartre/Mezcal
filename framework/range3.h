@@ -128,7 +128,7 @@ public:
     }
 
     /// Returns a \c Range3 that describes the intersection of \p a and \p b.
-    static Range3 GetIntersection(const Range3 &a, const Range3 &b) {
+    static Range3 getIntersection(const Range3 &a, const Range3 &b) {
         Range3 res = a;
         findMax(res._min,b._min);
         findMin(res._max,b._max);
@@ -236,13 +236,6 @@ public:
     bool operator !=(const Range3 &b) const {
         return !(*this == b);
     }
-
-    /// Compare this range to a GfRange3d.
-    ///
-    /// The values must match exactly and it does exactly what you might
-    /// expect when comparing float and double values.
-    inline bool operator ==(const Range3& other) const;
-    inline bool operator !=(const Range3& other) const;
 
     /// Compute the squared distance from a point to the range
     float getDistanceSquared(const Vector3 &p) const;

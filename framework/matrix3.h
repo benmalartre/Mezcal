@@ -5,6 +5,7 @@
 #define _MATRIX3_H_
 
 #include <math.h>
+#include "common.h"
 
 namespace BOB{
 class Matrix3{
@@ -200,6 +201,13 @@ public:
         return m;
     }
     
+    void setRow(unsigned index, const Vector3& value)
+    {
+        v[index*3+0] = value.x;
+        v[index*3+1] = value.y;
+        v[index*3+2] = value.z;
+    }
+    
     Quaternion getQuaternion(bool transpose=false)
     {
         float t, s;
@@ -283,6 +291,22 @@ public:
             }
         }
         return q;
+    }
+    
+    float getDeterminant() const
+    {
+        return (v[0] * v[4] * v[8] +
+                v[1] * v[5] * v[6] +
+                v[2] * v[3] * v[7] -
+                v[0] * v[5] * v[7] -
+                v[1] * v[3] * v[8] -
+                v[2] * v[4] * v[6]);
+    }
+
+    
+    float getHandedness() const
+    {
+        return SIGN(getDeterminant());
     }
 };
     

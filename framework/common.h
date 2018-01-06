@@ -31,5 +31,7 @@ namespace BOB{
 #define CLAMP(value, low, high)(value < low) ? low : ((value > high) ? high : value)
 #define MAXIMUM(value, limit)value<limit ? limit : value
 #define MINIMUM(value, limit)value>limit ? limit : value
+#define SIGN(value)(value < 0) ? -1 : ((value > 0) ? 1 : 0)
+    
 } // end namespace BOB
 #endif // _COMMON_H_

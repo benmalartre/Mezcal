@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include <cfloat>
+#include <math.h>
 
 namespace BOB{
 class Range1

@@ -100,84 +100,124 @@ public:
     // compute inverse
     bool computeInverse(const Matrix4& other, bool transpose=false)
     {
-        unsigned x, y, z, cnt;
+        unsigned i, j, k;
         float fSys[4][8];
         float fTemp;
         
         // initialize fSys array
-        for(x=0;x<4;x++)
+        for(i=0;i<4;i++)
         {
-            for(y=0;y<4;y++)
+            for(j=0;j<4;j++)
             {
-                fSys[x][y] = other[x*4+y];
-                if(x==y)fSys[x][y+4] = 1.0f;
-                else fSys[x][y+4] = 0.0f;
+                fSys[i][j] = other[i*4+j];
+                if(i==j)fSys[i][j+4] = 1.0f;
+                else fSys[i][j+4] = 0.0f;
             }
         }
         
-        // compute inverse
-        for(y=0;y<4;y++)
+        // Compute inverse:
+        for(j=0; j<4; j++)
         {
-            if(fabs(fSys[y][y])<0.0000001)
+        	if(fabs(fSys[j][j]) < 0.0000001)
             {
-                cnt = y+1;
-                for(x=0;x<4;x++)
+           		for(i=j + 1; (i<4) && (fabs(fSys[i][j]) < 0.0000001 ); i++)
+                {};
+                if(i==4)
                 {
-                    if(fabs(fSys[x][y])<0.0000001) cnt++;
+                	return(false);
+                }
+                else
+                {
+                	for(k=0; k<8; k++)
+                    {
+                    	fTemp = fSys[i][k];
+                        fSys[i][k] = fSys[j][k];
+                        fSys[j][k] = fTemp;
+                    }
+                }
+            }
+            fTemp = 1.0f / fSys[j][j];
+            for(i=0; i<8; i++)
+            {
+            	fSys[j][i] *= fTemp;
+            }
+            for(i=0; i<4; i++)
+            {
+            	if(i != j)
+                {
+                	fTemp = - fSys[i][j];
+                    for(k=0; k<8; k++)
+                    {
+                    	fSys[i][k] += fSys[j][k] * fTemp;
+                    }
+                }
+            }
+        }
+        /*
+        // compute inverse
+        for(j=0;j<4;j++)
+        {
+            if(fabs(fSys[j][j])<0.0000001)
+            {
+                cnt = j+1;
+                for(i=j+1;i<4;i++)
+                {
+                    if(fabs(fSys[i][j])<0.0000001) cnt++;
                 }
                 // check singular matrix
                 if(cnt == 4)return false;
                 else
                 {
-                    for(z=0;z<8;z++)
+                    for(k=0;k<8;k++)
                     {
-                        fTemp = fSys[x][z];
-                        fSys[x][z] = fSys[y][z];
-                        fSys[y][z] = fTemp;
+                        fTemp = fSys[i][k];
+                        fSys[i][k] = fSys[j][k];
+                        fSys[j][k] = fTemp;
                     }
                 }
             }
-            if(fSys[y][y]!=0.0f)fTemp = 1.0f / fSys[y][y];
-            for(x=0;x<8;x++) fSys[y][x] *= fTemp;
+            if(fSys[j][j]!=0.0f)fTemp = 1.0f / fSys[j][j];
+            for(i=0;i<8;i++) fSys[j][i] *= fTemp;
             
-            for(x=0;x<4;x++)
+            for(i=0;i<4;i++)
             {
-                if(x!=y)
+                if(i!=j)
                 {
-                    fTemp = -fSys[x][y];
-                    for(z=0;z<8;z++)
+                    fTemp = -fSys[i][j];
+                    for(k=0;k<8;k++)
                     {
-                        fSys[x][z] += (fSys[y][z]*fTemp);
+                        fSys[i][k] += (fSys[j][k]*fTemp);
                     }
                 }
             }
         }
+         */
         
         // copy result
         if(transpose)
         {
-            for(x=0;x<4;x++)
+            for(i=0;i<4;i++)
             {
-                for(y=0;y<4;y++)
+                for(j=0;j<4;j++)
                 {
-                    v[x+y*4] = fSys[x][y+4];
+                    v[i+j*4] = fSys[i][j+4];
                 }
             }
         }
         else
         {
-            for(x=0;x<4;x++)
+            for(i=0;i<4;i++)
             {
-                for(y=0;y<4;y++)
+                for(j=0;j<4;j++)
                 {
-                    v[x*4+y] = fSys[x][y+4];
+                    v[i*4+j] = fSys[i][j+4];
                 }
             }
         }
         return true;
     }
     
-    Matrix4& inverse()
+    Matrix4& inverseInPlace()
     {
         computeInverse(*this);
         return *this;
@@ -190,7 +230,7 @@ public:
         return m;
     };
     
-    Matrix4& transpose()
+    Matrix4& transposeInPlace()
     {
         unsigned x, y;
         Matrix4 o(*this);
@@ -257,6 +297,110 @@ public:
             Q.z = 0.25 * S;
         }
         return Q;
+    }
+    
+    Matrix4& setRotate(float ax, float ay, float az , float angle)
+    {
+        v[0] = 1.0f - 2.0f * (ay * ay + az * az);
+        v[1] =       2.0f * (ax * ay + az *    angle);
+        v[2] =       2.0f * (az * ax - ay *    angle);
+        v[3] = 0.0f;
+        
+        v[4] =       2.0f * (ax * ay - az *    angle);
+        v[5] = 1.0f - 2.0f * (az * az + ax * ax);
+        v[6] =       2.0f * (ay * az + ax *    angle);
+        v[7] = 0.0f;
+        
+        v[8] =       2.0f * (az * ax + ay *    angle);
+        v[9] =       2.0f * (ay * az - ax *    angle);
+        v[10] = 1.0f - 2.0f * (ay * ay + ax* ax);
+        v[11] = 0.0f;
+        
+        v[12] = 0.0f;
+        v[13] = 0.0f;
+        v[14] = 0.0f;
+        v[15] = 1.0f;
+        
+        return *this;
+    }
+    
+    
+    float getDeterminant() const
+    {
+        return (- v[3] * getDeterminant3(1, 2, 3, 0, 1, 2)
+                + v[7] * getDeterminant3(0, 2, 3, 0, 1, 2)
+                - v[11] * getDeterminant3(0, 1, 3, 0, 1, 2)
+                + v[15] * getDeterminant3(0, 1, 2, 0, 1, 2));
+    }
+    
+    float getDeterminant3(size_t row1, size_t row2, size_t row3,
+                                 size_t col1, size_t col2, size_t col3) const
+    {
+        return (v[row1*4+col1] * v[row2*4+col2] * v[row3*4+col3] +
+                v[row1*4+col2] * v[row2*4+col3] * v[row3*4+col1] +
+                v[row1*4+col3] * v[row2*4+col1] * v[row3*4+col2] -
+                v[row1*4+col1] * v[row2*4+col3] * v[row3*4+col2] -
+                v[row1*4+col2] * v[row2*4+col1] * v[row3*4+col3] -
+                v[row1*4+col3] * v[row2*4+col2] * v[row3*4+col1]);
+    }
+    
+    float getHandedness() const
+    {
+        // Note: This can be computed with fewer arithmetic operations using a
+        //       cross and dot product, but it is more important that the result
+        //       is consistent with the way the determinant is computed.
+        return SIGN(getDeterminant3());
+    }
+    
+    /*
+     * Make the matrix orthonormal in place using an iterative method.
+     * It is potentially slower if the matrix is far from orthonormal (i.e. if
+     * the row basis vectors are close to colinear) but in the common case
+     * of near-orthonormality it should be just as fast.
+     *
+     * The translation part is left intact.  If the translation is represented as
+     * a homogenous coordinate (i.e. a non-unity lower right corner), it is divided
+     * out.
+     */
+    bool orthonormalize(bool issueWarning)
+    {
+        // orthogonalize and normalize row vectors
+        Vector3 r0(v[0],v[1],v[2]);
+        Vector3 r1(v[4],v[5],v[6]);
+        Vector3 r2(v[8],v[9],v[10]);
+        bool result = GfVec3d::OrthogonalizeBasis(&r0, &r1, &r2, true);
+        _mtx[0][0] = r0[0];
+        _mtx[0][1] = r0[1];
+        _mtx[0][2] = r0[2];
+        _mtx[1][0] = r1[0];
+        _mtx[1][1] = r1[1];
+        _mtx[1][2] = r1[2];
+        _mtx[2][0] = r2[0];
+        _mtx[2][1] = r2[1];
+        _mtx[2][2] = r2[2];
+        
+        // divide out any homogeneous coordinate - unless it's zero
+        if (_mtx[3][3] != 1.0 && !GfIsClose(_mtx[3][3], 0.0, GF_MIN_VECTOR_LENGTH))
+        {
+            _mtx[3][0] /= _mtx[3][3];
+            _mtx[3][1] /= _mtx[3][3];
+            _mtx[3][2] /= _mtx[3][3];
+            _mtx[3][3] = 1.0;
+        }
+        
+        if (!result && issueWarning)
+            TF_WARN("OrthogonalizeBasis did not converge, matrix may not be "
+                    "orthonormal.");
+        
+        return result;
+    }
+    
+    GfMatrix4f
+    GfMatrix4f::GetOrthonormalized(bool issueWarning) const
+    {
+        GfMatrix4f result = *this;
+        result.Orthonormalize(issueWarning);
+        return result;
     }
 };
     

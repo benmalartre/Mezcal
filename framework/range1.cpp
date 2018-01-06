@@ -7,11 +7,11 @@ float Range1::getDistanceSquared(float p) const
 
     if (p < _min) {
 	// p is left of box
-	dist += GfSqr(_min - p);
+	dist += sqrtf(_min - p);
     }
     else if (p > _max) {
 	// p is right of box
-	dist += GfSqr(p - _max);
+	dist += sqrtf(p - _max);
     }
 
     return dist;
