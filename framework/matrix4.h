@@ -7,6 +7,7 @@
 #include <math.h>
 #include "quaternion.h"
 
+class Vector3;
 namespace BOB{
 class Matrix4{
 public:
@@ -346,60 +347,135 @@ public:
     
     float getHandedness() const
     {
-        // Note: This can be computed with fewer arithmetic operations using a
-        //       cross and dot product, but it is more important that the result
-        //       is consistent with the way the determinant is computed.
-        return SIGN(getDeterminant3());
+        return SIGN(getDeterminant());
     }
     
-    /*
-     * Make the matrix orthonormal in place using an iterative method.
-     * It is potentially slower if the matrix is far from orthonormal (i.e. if
-     * the row basis vectors are close to colinear) but in the common case
-     * of near-orthonormality it should be just as fast.
-     *
-     * The translation part is left intact.  If the translation is represented as
-     * a homogenous coordinate (i.e. a non-unity lower right corner), it is divided
-     * out.
-     */
+    bool orthogonalizeBasis(float *tx, float *ty, float *tz,
+                         bool normalize, float eps)
+    {
+        GfVec3f ax,bx,cx,ay,by,cy,az,bz,cz;
+        
+        if (normalize) {
+            GfNormalize(tx);
+            GfNormalize(ty);
+            GfNormalize(tz);
+            ax = *tx;
+            ay = *ty;
+            az = *tz;
+        } else {
+            ax = *tx;
+            ay = *ty;
+            az = *tz;
+            ax.Normalize();
+            ay.Normalize();
+            az.Normalize();
+        }
+        
+        /* Check for colinear vectors. This is not only a quick-out: the
+         * error computation below will evaluate to zero if there's no change
+         * after an iteration, which can happen either because we have a good
+         * solution or because the vectors are colinear.   So we have to check
+         * the colinear case beforehand, or we'll get fooled in the error
+         * computation.
+         */
+        if (GfIsClose(ax,ay,eps) || GfIsClose(ax,az,eps) || GfIsClose(ay,az,eps)) {
+            return false;
+        }
+        
+        const int MAX_ITERS = 20;
+        int iter;
+        for (iter = 0; iter < MAX_ITERS; ++iter) {
+            bx = *tx;
+            by = *ty;
+            bz = *tz;
+            
+            bx -= GfDot(ay,bx) * ay;
+            bx -= GfDot(az,bx) * az;
+            
+            by -= GfDot(ax,by) * ax;
+            by -= GfDot(az,by) * az;
+            
+            bz -= GfDot(ax,bz) * ax;
+            bz -= GfDot(ay,bz) * ay;
+            
+            cx = 0.5*(*tx + bx);
+            cy = 0.5*(*ty + by);
+            cz = 0.5*(*tz + bz);
+            
+            if (normalize) {
+                cx.Normalize();
+                cy.Normalize();
+                cz.Normalize();
+            }
+            
+            GfVec3f xDiff = *tx - cx;
+            GfVec3f yDiff = *ty - cy;
+            GfVec3f zDiff = *tz - cz;
+            
+            double error =
+            GfDot(xDiff,xDiff) + GfDot(yDiff,yDiff) + GfDot(zDiff,zDiff);
+            
+            // error is squared, so compare to squared tolerance
+            if (error < GfSqr(eps))
+                break;
+            
+            *tx = cx;
+            *ty = cy;
+            *tz = cz;
+            
+            ax = *tx;
+            ay = *ty;
+            az = *tz;
+            
+            if (!normalize) {
+                ax.Normalize();
+                ay.Normalize();
+                az.Normalize();
+            }
+        }
+        
+        return iter < MAX_ITERS;
+    }
+    
     bool orthonormalize(bool issueWarning)
     {
         // orthogonalize and normalize row vectors
-        Vector3 r0(v[0],v[1],v[2]);
-        Vector3 r1(v[4],v[5],v[6]);
-        Vector3 r2(v[8],v[9],v[10]);
-        bool result = GfVec3d::OrthogonalizeBasis(&r0, &r1, &r2, true);
-        _mtx[0][0] = r0[0];
-        _mtx[0][1] = r0[1];
-        _mtx[0][2] = r0[2];
-        _mtx[1][0] = r1[0];
-        _mtx[1][1] = r1[1];
-        _mtx[1][2] = r1[2];
-        _mtx[2][0] = r2[0];
-        _mtx[2][1] = r2[1];
-        _mtx[2][2] = r2[2];
+        float r0[3] = {v[0],v[1],v[2]};
+        float r1[3] = {v[4],v[5],v[6]};
+        float r2[3] = {v[8],v[9],v[10]};
+        bool result = orthogonalizeBasis(&r0, &r1, &r2, true);
+        v[0] = r0[0];
+        v[1] = r0[1];
+        v[2] = r0[2];
+        v[4] = r1[0];
+        v[5] = r1[1];
+        v[6] = r1[2];
+        v[8] = r2[0];
+        v[9] = r2[1];
+        v[10] = r2[2];
         
         // divide out any homogeneous coordinate - unless it's zero
-        if (_mtx[3][3] != 1.0 && !GfIsClose(_mtx[3][3], 0.0, GF_MIN_VECTOR_LENGTH))
+        if (v[15] != 1.0 && fabsf(v[15])>0.0000001f)
         {
-            _mtx[3][0] /= _mtx[3][3];
-            _mtx[3][1] /= _mtx[3][3];
-            _mtx[3][2] /= _mtx[3][3];
-            _mtx[3][3] = 1.0;
+            v[12] /= v[15];
+            v[13] /= v[15];
+            v[14] /= v[15];
+            v[15] = 1.0;
         }
         
+        /*
         if (!result && issueWarning)
             TF_WARN("OrthogonalizeBasis did not converge, matrix may not be "
                     "orthonormal.");
+        */
         
         return result;
     }
     
-    GfMatrix4f
-    GfMatrix4f::GetOrthonormalized(bool issueWarning) const
+    Matrix4 getOrthonormalized(bool issueWarning) const
     {
-        GfMatrix4f result = *this;
-        result.Orthonormalize(issueWarning);
+        Matrix4 result = *this;
+        result.orthonormalize(issueWarning);
         return result;
     }
 };
